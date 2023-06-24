@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+# import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +26,8 @@ SECRET_KEY = 'django-insecure-g&*5p2p4@$h-2qg6%#^79gt0x1q8s&*nj#&#^we4hb55+oy0(z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.versel.app']
-# ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['.versel.app']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -149,3 +150,6 @@ REST_FRAMEWORK = {
 
 
 AUTH_USER_MODEL = 'users.UserAccount'
+
+
+# django_heroku.settings.locals(())
