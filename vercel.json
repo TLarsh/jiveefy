@@ -1,4 +1,5 @@
-{
+
+  {
     "builds": [
       {
         "src": "jiviefy/wsgi.py",
@@ -6,15 +7,27 @@
         "config": {
           "maxLambdaSize": "5mb"
         }
+      },
+      {
+        "src": "build_files.sh",
+        "use": "@vercel/static-build",
+        "config": {
+          "distDir": "staticfiles_build"
+        }
       }
     ],
     "routes": [
       {
-        "src": "/api/(.*)",
-        "dest": "jiviefy/wsgi.py"
+        "src": "/static/(.*)",
+        "dest": "static/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "jiviefy/wsgi.py/$1"
       }
-      
-    ]
-   
+    ],
+    "env": {
+      "MY_VARIABLE": "my-value"
+    }
   }
   

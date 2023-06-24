@@ -96,7 +96,7 @@ class CategoryDetail(APIView):
         return Response(serializer.data)
     
 
-class LocationSearchView(APIView):
+class PodcastSearchView(APIView):
     permission_classes = (permissions.AllowAny, )
     serializer_classes = (PodcastSerializer)
 
@@ -106,20 +106,25 @@ class LocationSearchView(APIView):
         
         location = data['location']
         queryset = queryset.filter(location__iexact=location)
+        
+        category = data['category']
+        queryset = queryset.filter(category__name=category)
+        
         keywords = data['keywords']
         queryset = queryset.filter(description__icontains=keywords)
+        
         serializer = PodcastSerializer(queryset, many=True)
         return Response(serializer.data)
     
-class CategorySearchView(APIView):
-    permission_classes = (permissions.AllowAny,)
-    def post(self, request, format=None):
-        queryset = Podcast.objects.order_by('-date_added')
-        data = self.request.data
-        category = data['category']
-        queryset = queryset.filter(category__name=category)
-        serializer = PodcastSerializer(queryset, many=True)
-        return Response(serializer.data)
+# class CategorySearchView(APIView):
+#     permission_classes = (permissions.AllowAny,)
+#     def post(self, request, format=None):
+#         queryset = Podcast.objects.order_by('-date_added')
+#         data = self.request.data
+#         category = data['category']
+#         queryset = queryset.filter(category__name=category)
+#         serializer = PodcastSerializer(queryset, many=True)
+#         return Response(serializer.data)
     
     
 # class CategorySearchView(APIView):
