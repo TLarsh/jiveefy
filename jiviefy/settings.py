@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import django_heroku
+# import django_heroku
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-g&*5p2p4@$h-2qg6%#^79gt0x1q8s&*nj#&#^we4hb55+oy0(z
 DEBUG = True
 
 # ALLOWED_HOSTS = ['.versel.app']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -128,6 +128,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / 'static/'
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
@@ -153,4 +154,4 @@ REST_FRAMEWORK = {
 AUTH_USER_MODEL = 'users.UserAccount'
 
 
-django_heroku.settings(locals())
+# django_heroku.settings(locals())
