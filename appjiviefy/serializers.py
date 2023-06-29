@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import(
     Podcast,
-    Category
+    Category,
+    RecordPodcast,
 )
 
 class PodcastSerializer(serializers.ModelSerializer):
@@ -9,6 +10,7 @@ class PodcastSerializer(serializers.ModelSerializer):
         model = Podcast
         fields = (
             "id",
+            "user",
             "title",
             "get_absolute_url",
             "category",
@@ -17,6 +19,11 @@ class PodcastSerializer(serializers.ModelSerializer):
             "get_image",
             "get_thumbnail"
         )
+        read_only_fields = ("user",)
+        
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
         
         
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,13 +39,11 @@ class CategorySerializer(serializers.ModelSerializer):
         )
         
 class AudioRecordSerializer(serializers.ModelSerializer):
-    podcasts = PodcastSerializer(many=True)
     
     class Meta:
-        model = Category
+        model = RecordPodcast
         fields = (
             "id",
-            "name", 
-            "get_absolute_url",
-            "podcasts",
+            "audio_record",
+            "record_date"
         )
