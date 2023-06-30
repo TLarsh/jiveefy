@@ -8,9 +8,9 @@ from appjiviefy.serializers import PodcastSerializer
 User = get_user_model()
 from rest_framework.response import Response
 from . import serializers
-from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes, force_str
 from base64 import urlsafe_b64decode
-from django.contrib.auth.tokens import PasswordResetTokenGenerator 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator, default_token_generator
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from .utils import Util
 from django.urls import reverse
@@ -18,19 +18,27 @@ from django.urls import reverse
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from users.serializers import(
+    AccountActivationSerializer,
     AdminUserSerialaizer,
     ResetPasswordEmailRequestSerializer,
     UserSerialaizer,
-    LogoutSerializer
+    LogoutSerializer,
 )
 from rest_framework.generics import(
+    CreateAPIView,
     ListAPIView,
     GenericAPIView,
     RetrieveUpdateDestroyAPIView
 )
 
 
+
+
 # Create your views here.
+# class RegistrationView(GenericAPIView):
+#     permission_classes =(permissions.AllowAny,)
+#     queryset = User.objects.all()
+#     serializer_class = RegistrationSerializer
 
 class SignupView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -59,14 +67,75 @@ class SignupView(APIView):
                 else:
                     user = User.objects.create_user(email=email, password=password, username=username)
                     user.save()
-                    return Response({'success':f'Account successfully created for {email}'})
+                    user = User.objects.filter(email=email).first()
+                    if user:
+                        encoded_pk = urlsafe_base64_encode (force_bytes(user.pk))
+                        token = self.RegistrationTokenGenerator().make_token(user)
+
+                        activation_url = reverse(
+                            "activate",
+                            kwargs = {
+                                "encoded_pk":encoded_pk,
+                                "token":token
+                            }
+                        )
+
+                        activation_url = f"localhost:8000{activation_url}"
+                        return Response(
+                            {
+                                "success":f"Account successfully created for {email}",
+                                "message":f"Your Account activation link: {activation_url}"
+                            },
+                            status = status.HTTP_201_CREATED,
+                        )
+                
+                    else:
+                        return Response(
+                            {"message":"User doesnt exists"},
+                            status = status.HTTP_400_BAD_REQUEST
+                        )
+            # return Response({'success':f'Account successfully created for {email}'})
         else:
             return Response({'error':'password not matched'})
         
-        
+    class RegistrationTokenGenerator:
+        def make_token(self, user):
+            return urlsafe_base64_encode(force_bytes(user.pk))
+
+        def check_token(self, user, token):
+            return urlsafe_base64_encode(force_bytes(user.pk)) == token    
         
 
-# Requests the registered email to password reser
+class AccountActivationView(GenericAPIView):
+    permission_classes = (permissions.AllowAny,) 
+    serializer_classes = UserSerialaizer
+    def patch(self, request, encoded_pk, token):
+        try:
+            pk = force_str(urlsafe_base64_decode(encoded_pk))
+            user = User.objects.get(pk=pk)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user=None
+
+        if not self.RegistrationTokenGenerator().check_token(user, token):
+            return Response({"Error":"Invalid activation token passed"})
+
+        
+        user.is_active=True
+        user.save()
+        return Response({"success":"Account activated"},        
+                         status = status.HTTP_200_OK)
+
+
+
+    class RegistrationTokenGenerator:
+        def make_token(self, user):
+            return urlsafe_base64_encode(force_bytes(user.pk))
+
+        def check_token(self, user, token):
+            return urlsafe_base64_encode(force_bytes(user.pk)) == token
+        
+
+# Requests the registered email to password reset
 
 class PasswordResetView(GenericAPIView):
     permission_classes = (permissions.AllowAny,)

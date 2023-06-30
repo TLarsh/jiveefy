@@ -3,6 +3,7 @@ from django.urls import path
 from django.urls import path, re_path
 from stripe import Account
 from .views import(
+    AccountActivationView,
     LogoutAPIView,
     PasswordResetView,
     ResetPassword,
@@ -19,6 +20,8 @@ urlpatterns = [
     path('count/', UserCountView.as_view(), name='user-count'),
     path('actives/', ActiveUserCountView.as_view(), name='active-user-count'),
     path('signup', SignupView.as_view(), name='signup'),
+    path('activate/<str:encoded_pk>/<str:token>/', AccountActivationView.as_view(), name='activate'),
+    # path('signup/', RegistrationView.as_view(), name='register'),
     path('password-reset/', PasswordResetView.as_view(), name='password-reset'),
     path('password-reset/<str:encoded_pk>/<str:token>/', 
          ResetPassword.as_view(), 

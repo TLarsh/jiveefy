@@ -31,7 +31,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     city = models.CharField(max_length=50, null=True, blank=True)
     bio = models.TextField(max_length=500, null=True, blank=True)
     picture_id = models.ImageField(max_length=500, null=True, blank=True)
-    is_active = models.BooleanField(default=True, )
+    is_active = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add = True)
     updated_at = models.DateTimeField(auto_now = True)
