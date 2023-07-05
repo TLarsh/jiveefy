@@ -3,6 +3,7 @@ from urllib import response
 from django.shortcuts import render
 from django.db.models import Q
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.decorators import api_view
@@ -211,8 +212,7 @@ class AudioRecordView(APIView):
         rec.save()
         serializer = AudioRecordSerializer(rec)
         return Response({
-            "Audio file successfully created",
-            serializer.data
+            "sucess":"Audio file successfully created",
         })
         
         

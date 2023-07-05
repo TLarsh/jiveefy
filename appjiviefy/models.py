@@ -142,5 +142,5 @@ class RecordPodcast(models.Model):
     audio_record = models.FileField(upload_to = 'uploads/%y/%m/%d')
     record_date = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self):
-        return self.audio_record
+    # def __str__(self):
+    #     return self.id

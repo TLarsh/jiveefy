@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
     'users',
-    'appjiviefy'
+    'appjiviefy',
+    # 'UserProfile'
 ]
 
 MIDDLEWARE = [
@@ -150,6 +151,12 @@ REST_FRAMEWORK = {
     ]
 }
 
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # other JWT settings...
+}
 
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': timedelta(hours=1),

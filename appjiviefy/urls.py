@@ -9,7 +9,7 @@ urlpatterns = [
     path('featured-podcasts/', views.FeaturedPodcastsListView.as_view(), name='featured-podcasts'),
     path('record-audio/', views.AudioRecordView.as_view(), name='record-audio'),
     path('audio/records/', views.AudioRecListView.as_view(), name='audios'),
-    path('audio/record/<pk>/', views.AudioRecordView.as_view(), name='audio'),
+    path('audio/<pk>/', views.AudioRecView.as_view(), name='audio'),
     path('podcasts/', views.PodcastsListView.as_view(), name='podcasts'),
     path('podcasts/search/', views.PodcastSearchView.as_view(), name='search'),
     path('podcasts/<slug:category_slug>/<slug:podcast_slug>/', views.PodcastDetail.as_view()),

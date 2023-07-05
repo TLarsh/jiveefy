@@ -1,3 +1,5 @@
+import profile
+from urllib import request
 from rest_framework import serializers
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
@@ -8,7 +10,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
-
+from django.contrib.auth.hashers import check_password
 
 from appjiviefy.models import Podcast
 
@@ -103,44 +105,45 @@ User = get_user_model()
 #         return urlsafe_base64_encode(force_bytes(user.pk)) == token
 
 
-class UserSerialaizer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "id",
-            "email",
-            "username",
-            "fullname",
-            "lastname",
-            "phone_number",
-            "city",
-            "bio",
-            "picture_id",
-            
+            'id',
+            'email',
+            'username',
+            'fullname',
+            'lastname',
+            'bio',
+            'phone_number',
+            'city',
+            'country_name',
+            'password',
+            'created_at',
+            'updated_at'
         )
+        
+ 
+class UserPodcastSerializer(serializers.ModelSerializer):
+    post_count = serializers.SerializerMethodField()
 
-class PodcastSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Podcast.objects.count()
-        fields = (
-            "user",
-        )
+        model = User
+        fields = ('username', 'plan', 'status', 'post_count')
+
+    def get_post_count(self, user):
+        return user.post_set.count()    
        
        
 class AdminUserSerialaizer(serializers.ModelSerializer):
     # podcast = PodcastSerializer(many=True)
     class Meta:
-        model = User
+        model = User        
         fields = (
             "id",
             "email",
             "username",
-            "fullname",
-            "lastname",
-            "phone_number",
-            "city",
-            "bio",
-            "picture_id",
+            
             # "podcast",  
     
             
@@ -264,7 +267,203 @@ class ResetPasswordEmailRequestSerializer(serializers.Serializer):
         
 
 
+from rest_framework import serializers
+# from django.contrib.auth.models import User
 
-        
+
+# serializers.py
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only =True, required=False)
+    new_password = serializers.CharField(write_only=True, required=False)
+    class Meta:
+       model = User
+       fields = ['fullname', 'lastname', 'email', 'current_password', 'new_password']
+       extra_kwargs = {
+           'email': {'required': True}
+       }
+
+
+
+
+# class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    # new_password = serializers.CharField(write_only=True, required=False)
+    # current_password = serializers.CharField(write_only=True, required=False)
+
+    # class Meta:
+    #    model = User
+    #    fields = ['fullname', 'lastname', 'email', 'current_password', 'new_password']
+    #    extra_kwargs = {
+    #        'email': {'required': True}
+    #    }
     
+    # def validate_current_password(self, user):
+    #     user = self.context['request'].user
+    #     if not user.check_password(user):
+    #         raise serializers.ValidationError('Current password is incorrect.')
+    #     return user
+
+    # def validate(self, attrs):
+    #     current_password = attrs.get('current_password')
+    #     new_password = attrs.get('new_password')
+
+    #     if current_password and not new_password:
+    #         raise serializers.ValidationError('New password is required.')
+
+    #     if new_password and not current_password:
+    #         raise serializers.ValidationError('Current password is required.')
+
+    #     return attrs
+
+    # def update(self, instance, validated_data):
+    #     current_password = validated_data.get.pop('current_password')
+    #     new_password = validated_data.get('new_password')
+
+    #     if current_password and new_password:
+    #         instance.set_password(new_password)
+    #         # instance.save()
+
+    #     return super().update(instance, validated_data)
+
+    # class Meta:
+    #     model = User
+    #     fields = ['first_name', 'last_name', 'email', 'current_password', 'new_password']
+    #     extra_kwargs = {
+    #         'email': {'required': True}
+    #     }
+
+# class UserProfileUpdateSerializer(serializers.ModelSerializer):
+#     user = UserSerializer(required=False)
+#     current_password = serializers.CharField(write_only=True, required=False)
+#     delete_picture_id = serializers.BooleanField(write_only=True, required=False)
+
+#     class Meta:
+#         model = UserProfile
+#         fields = ('user', 'fullname', 'lastname', 'image', 'current_password', 'delete_picture_id')
+
+#     def validate(self, attrs):
+#         request = self.context['request']
+#         user = request.user
+#         current_password = attrs.get('current_password')
+
+#         if current_password and not user.check_password(current_password):
+#             raise serializers.ValidationError("Current password is incorrect.")
+
+#         return attrs
+
+#     def update(self, instance, validated_data):
+#         user_data = validated_data.pop('user', None)
+#         fullname = validated_data.get('fullname')
+#         lastname = validated_data.get('lastname')
+#         # picture_id = validated_data.get('picture_id')
+#         image = validated_data.get('image')
+#         current_password = validated_data.get('current_password')
+#         delete_picture_id = validated_data.get('delete_picture_id', False)
+
+#         if user_data:
+#             user = instance.user
+#             user.email = user_data.get('email', user.email)
+#             user.username = user_data.get('username', user.username)
+#             new_password = user_data.get('password')
+
+#             if new_password:
+#                 user.set_password(new_password)
+
+#             user.save()
+
+#         if fullname is not None:
+#             instance.fullname = fullname
+#         if lastname is not None:
+#             instance.lastname = lastname
+#         # if picture_id is not None:
+#             # instance.picture_id = picture_id
+#         if delete_picture_id:
+#             instance.picture_id = None
+#             instance.image.delete(save=False)
+#         if image is not None:
+#             instance.image = image
+
+#         instance.save()
+#         return instance
+
+
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    # profile = UserProfileSerializer(required=False)
+    current_password = serializers.CharField(write_only=True, required=False)
+    delete_image = serializers.BooleanField(write_only=True, required=False)
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'username',
+            'fullname',
+            'lastname',
+            'bio',
+            'phone_number',
+            'city',
+            'country_name',
+            'current_password',
+            'password',
+            'image',
+            'delete_image'
+        )
         
+        
+    def validate(self, attrs):
+        request = self.context['request']
+        user = request.user
+        current_password = attrs.get('current_password')
+
+        if current_password and not user.check_password(current_password):
+            raise serializers.ValidationError("Current password is incorrect.")
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        # user = self.context[request].user
+        email = validated_data.get('email', instance.email)
+        username = validated_data.get('username', instance.username)
+        fullname = validated_data.get('fullname', instance.fullname)
+        lastname = validated_data.get('lastname', instance.lastname)
+        city = validated_data.get('city', instance.city)
+        phone_number = validated_data.get('phone_number', instance.phone_number)
+        country_name = validated_data.get('country_name', instance.country_name)
+        bio = validated_data.get('bio', instance.bio)
+        image = validated_data.get('bio', instance.image)
+        delete_image = validated_data.get('delete_image', False)
+        password = validated_data.get('password', instance.password)
+
+
+
+        if email is not None:
+            instance.email=email
+        if username is not None:
+            instance.username = username
+        if fullname is not None:
+            instance.fullname = fullname
+        if lastname is not None:
+            instance.lastname = lastname
+        if city is not None:
+            instance.city = city
+        if bio is not None:
+            instance.bio = bio
+        if phone_number is not None:
+            instance.phone_number = phone_number  
+        if country_name is not None:
+            instance.country_name = country_name
+        if image is not None:
+            instance.image = image
+        if delete_image:
+           instance.delete_image = None
+           instance.image.delete(save=False)
+            
+        new_password = password
+        if new_password:
+            instance.set_password(new_password)
+         
+        instance.save()
+        return instance

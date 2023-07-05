@@ -2,7 +2,6 @@ from configparser import NoOptionError
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-
 from appjiviefy.models import Podcast
 from appjiviefy.serializers import PodcastSerializer
 User = get_user_model()
@@ -21,14 +20,20 @@ from users.serializers import(
     AccountActivationSerializer,
     AdminUserSerialaizer,
     ResetPasswordEmailRequestSerializer,
-    UserSerialaizer,
+    UserProfileUpdateSerializer,
+    UserSerializer,
     LogoutSerializer,
+
 )
 from rest_framework.generics import(
     CreateAPIView,
     ListAPIView,
     GenericAPIView,
-    RetrieveUpdateDestroyAPIView
+    RetrieveUpdateDestroyAPIView,
+    UpdateAPIView,
+    RetrieveAPIView
+    
+
 )
 
 
@@ -108,7 +113,7 @@ class SignupView(APIView):
 
 class AccountActivationView(GenericAPIView):
     permission_classes = (permissions.AllowAny,) 
-    serializer_classes = UserSerialaizer
+    serializer_classes = UserSerializer
     def patch(self, request, encoded_pk, token):
         try:
             pk = force_str(urlsafe_base64_decode(encoded_pk))
@@ -186,17 +191,19 @@ class ResetPassword(GenericAPIView):
             status=status.HTTP_200_OK,
         )
                 
-
+class UserProfileDetailView(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
                     
 class UserView(RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = User.objects.all()
-    serializer_class = (UserSerialaizer)
+    serializer_class = (UserSerializer)
     
 class UsersView(ListAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = User.objects.all()
-    serializer_class = (UserSerialaizer)
+    serializer_class = (UserSerializer)
     
 class LogoutAPIView(GenericAPIView):
     serializer_class = (LogoutSerializer)
@@ -240,15 +247,57 @@ class UserAdminView(ListAPIView):
             user['posts'] = serialized_posts
 
         return Response(serialized_users)
+ 
+
+class UserProfileUpdateView(UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileUpdateSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    # def get_object(self):
+    #     return self.request.user
     
-# class UserActionView(APIView):
-#     def get(self, request, user_id):
-#         # Retrieve the user based on the provided user_id
-#         user = User.objects.get(id=user_id)
 
-#         # Count the number of posts for the user
-#         post_count = Podcast.objects.filter(user=user).count()
-#         serializer = AdminUserSerialaizer
+# from .serializers import ChangePasswordSerializer, UserProfileSerializer
+# from django.contrib.auth.hashers import check_password
 
-#         # Return the post count as a response
-#         return Response({'post_count': post_count}, serializer.data)
+# class ChangePasswordView(APIView):
+#     queryset = User.objects.all()
+#     def put(self, request):
+#         serializer = ChangePasswordSerializer(data= request.data)
+        
+#         # def perform_update(self, serializer):
+#         if serializer.is_valid():
+#             picture_id = self.request.FILES.get('picture_id', None)
+#             if picture_id is None:
+#                 serializer.save(picture_id=None)
+#             else:
+#                 serializer.save()
+        
+
+#             current_password = serializer.validated_data.get('password', None)
+#             new_password = serializer.validated_data.get('password', None)
+#             if current_password and new_password!= None:
+#                 current_password = current_password
+#                 new_password = new_password
+#                 user = request.user
+
+#                 if not check_password(current_password, user.password):
+#                     return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+
+#                 user.set_password(new_password)
+#                 user.save()
+
+#             return Response({'message': 'Password has been changed successfully.'}, status=status.HTTP_200_OK)
+
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+from rest_framework import viewsets, permissions
+
+from .serializers import UserPodcastSerializer
+
+class UserPodcastlists(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserPodcastSerializer
+    permission_classes = [permissions.IsAuthenticated]  # Adjust permissions as needed
